@@ -3,6 +3,30 @@ from django.shortcuts import get_object_or_404, render
 from .models import Choice, Question
 from django.urls import reverse
 from django.views import generic
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from .serializers import QuestionSerializer
+
+@api_view(['GET'])
+def get_questions(request):
+    """
+    Get the list of questions on our website
+    """
+    questions = Question.objects.all()
+    serializer = QuestionSerializer(questions, many=True)
+    return Response(serializer.data)
+
+@api_view(['POST'])
+def update_question(request, pk):
+    """
+    Get the list of questions on our website
+    """
+    question = Question.objects.get(id=pk)
+    serializer = QuestionSerializer(question, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(status=400, data=serializer.errors)
 
 class IndexView(generic.ListView):
     template_name = 'polls/index.html'
